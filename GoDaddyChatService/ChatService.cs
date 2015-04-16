@@ -15,25 +15,71 @@ namespace GoDaddyChatService
 
         ServiceModel model = new ServiceModel();
 
+
+        Dictionary<String, InterfaceChatCallBack> loggedInUser =
+                 new Dictionary<String, InterfaceChatCallBack>();
+         
+
         public string Register(User user)
         {
-            model.registerUser(user.name);
-
-            for (int i = 0; i < 10; i++)
-            {
-                Thread.Sleep(50);
-                OperationContext.Current.GetCallbackChannel<InterfaceChatCallBack>().RecievMessage("stat: " + i);
-            }
-
-                return user.name + " registered";
+            // opret ham i db
+            return "";
         }
 
-        public string Login(User user)
+        public string Login(string username, string password)
         {
-            model.loginUser(user.name);
-            return user.name + " logged in";
+            // smid usernam + callback i dictionary
+
+            // den loggede ind bruger skal have kalt metoden -> receve friend list(usernames)
+
+            // alle loggede ind bruger i dict -> update friend list (username) hvis de er venner
+
+
+            return ";";
         }
-        
-       
+
+        string SendMessage(string username, string message)
+        {
+            // skaf callback fro username fra dict
+
+            // call -> recievMessage metoden
+
+            // hvis han ikke kan kontaktest send feedback
+            // ellers retunere samme besked
+
+            return "";
+        }
+
+        String AddFriend(string friend)
+        {
+            // check om bruger eksistere og om de allerede er venner
+            
+            // update db venneliste for uswername (dict look up) med flag false
+            // 
+            // kald update friend list(username) og friend
+
+            // for username skal den retunerede User's status være ikke accepteret 
+
+            return "";
+        }
     }
 }
+
+/*
+ [OperationContract]
+        string Register(User username);
+
+        
+
+        [OperationContract]
+        String AddFriend(string username);
+        
+        [OperationContract]
+        string RemoveFriend(string username);
+
+        [OperationContract]
+        string GetMessageHistory(string username);
+*/
+
+// skaf call back
+// //OperationContext.Current.GetCallbackChannel<InterfaceChatCallBack>().RecievMessage("stat: " + i);

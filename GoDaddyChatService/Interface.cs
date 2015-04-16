@@ -12,10 +12,25 @@ namespace GoDaddyChatService
     public interface InterfaceServerChatService
     {
         [OperationContract]
-        string Register(User username);
+        string Register(User user);
 
         [OperationContract]
-        string Login(User username);
+        User Login(string username, string password);
+
+        [OperationContract]
+        void LogOut(string username);
+
+        [OperationContract]
+        string SendMessage(string username, string message);
+
+        [OperationContract]
+        String AddFriend(string username);
+        
+        [OperationContract]
+        string RemoveFriend(string username);
+
+        [OperationContract]
+        string GetMessageHistory(string username);
 
     }
 
