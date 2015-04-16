@@ -8,8 +8,8 @@ using System.Text;
 namespace GoDaddyChatService
 {
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IService1" in both code and config file together.
-    [ServiceContract]
-    public interface IChatInterface
+    [ServiceContract(CallbackContract = typeof(InterfaceChatCallBack))] 
+    public interface InterfaceServerChatService
     {
         [OperationContract]
         string Register(User username);
@@ -17,10 +17,12 @@ namespace GoDaddyChatService
         [OperationContract]
         string Login(User username);
 
+    }
 
-       
-
-        // TODO: Add your service operations here
+    public interface InterfaceChatCallBack
+    {
+        [OperationContract]
+        void RecievMessage(String message);
     }
 
     // Use a data contract as illustrated in the sample below to add composite types to service operations.
