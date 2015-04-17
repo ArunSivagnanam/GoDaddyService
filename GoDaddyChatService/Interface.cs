@@ -21,16 +21,16 @@ namespace GoDaddyChatService
         void LogOut(string username);
 
         [OperationContract]
-        string SendMessage(string username, string message);
+        string SendMessage(string sender,string reciever, string message);
 
         [OperationContract]
-        String AddFriend(string username);
+        String AddFriend(string user, string friend);
         
         [OperationContract]
-        string RemoveFriend(string username);
+        string RemoveFriend(string user, string friend);
 
         [OperationContract]
-        string GetMessageHistory(string username);
+        string GetMessageHistory(string user, string friend);
 
     }
 

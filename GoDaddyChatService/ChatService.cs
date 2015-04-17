@@ -13,73 +13,97 @@ namespace GoDaddyChatService
     public class ChatService : InterfaceServerChatService
     {
 
-        ServiceModel model = new ServiceModel();
+        ServiceModel model = new ServiceModel(); 
 
 
-        Dictionary<String, InterfaceChatCallBack> loggedInUser =
-                 new Dictionary<String, InterfaceChatCallBack>();
-         
+        Dictionary<String, InterfaceChatCallBack> loggedInUserChannels =
+                        new Dictionary<String, InterfaceChatCallBack>(); // key username
+
+        Dictionary<String, User> loggedInUsers =
+                        new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
+
 
         public string Register(User user)
         {
-            // opret ham i db
+            // 1) Opret ham i databasen
+
             return "";
         }
 
         public string Login(string username, string password)
         {
-            // smid usernam + callback i dictionary
+            // 1) Hent bruger fra databasen ud fra username og password hvis han eksistere
+            
+            // 2) Smid usernam + callbackchennel i dictionary loggedin user channels
 
-            // den loggede ind bruger skal have kalt metoden -> receve friend list(usernames)
+            // 3) Skaf usernames for brugerens venner fra databasen
+            
+            // 4) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
 
-            // alle loggede ind bruger i dict -> update friend list (username) hvis de er venner
-
-
+            // 5) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
+            
             return ";";
         }
 
-        string SendMessage(string username, string message)
+        string SendMessage(string sender ,string reciever, string message)
         {
-            // skaf callback fro username fra dict
+            // 1) Check om reciever er obline (er han i dictionary)
 
-            // call -> recievMessage metoden
-
-            // hvis han ikke kan kontaktest send feedback
-            // ellers retunere samme besked
-
-            return "";
-        }
-
-        String AddFriend(string friend)
-        {
-            // check om bruger eksistere og om de allerede er venner
+            // 2) Skaf callback channel for reciver og sender
             
-            // update db venneliste for uswername (dict look up) med flag false
-            // 
-            // kald update friend list(username) og friend
+            // 3) Kald RecieveMessage metoden på reciever
 
-            // for username skal den retunerede User's status være ikke accepteret 
+            // 4) Hvis beskeden modtages korrekt, send samme besked tilbage til sender
+                    // ellers send fejl besked
+
+            // 5) Opdatere message history i db for sender og reciever
 
             return "";
         }
+
+        String AddFriend(string user, string friend)
+        {
+            // 1) Check om friend eksistere i db og om de allerede er venner
+            
+            // 2) opdatere db venneliste for user og friend med flag accepted false
+
+            // 3) Kald UpdateFriendLits(User friend) for user, men sæt friend status til "not accepted"
+
+            // 4) Hvis friend er online kald UpdateFriendLits(User user) på friend, friend skal derefter acceptere user
+            
+            // 5) Hvis friend ikke er online, skal han acceptere user neste gang han logger ind. 
+
+            return "";
+        }
+
+
+        string RemoveFriend(string user, string friend)
+        {
+            // 1) Check om friend eksistere i db og om de allerede er venner
+
+            // 2) opdatere db venneliste for user og friend ved at fjerne rækkerne  eller set flag til blocked
+
+            // 3) Kald metoden RecieveFriendList(List<User>)
+
+            // 4) Hvis friend er online gør det samme for friend
+
+            return "";
+        }
+
+        string GetMessageHistory(string user, string friend)
+        {
+
+            // 1) Skaf callback channel for user
+
+            // 2) Skaf message history for reciever = user og sender = friend og send 
+
+            // 3) retunere svaret som formateret string eller en liste af stringe eller noget
+
+            return "";
+        }
+
     }
 }
 
-/*
- [OperationContract]
-        string Register(User username);
-
-        
-
-        [OperationContract]
-        String AddFriend(string username);
-        
-        [OperationContract]
-        string RemoveFriend(string username);
-
-        [OperationContract]
-        string GetMessageHistory(string username);
-*/
-
-// skaf call back
+// skaf current call back
 // //OperationContext.Current.GetCallbackChannel<InterfaceChatCallBack>().RecievMessage("stat: " + i);
