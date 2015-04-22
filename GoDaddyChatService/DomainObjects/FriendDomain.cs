@@ -8,10 +8,12 @@ namespace GoDaddyChatService.DomainObjects
 {
     class FriendDomain
     {
+
+        public int id { get; set; }
         public int requesterID { get; set; }
 
         public int friendID { get; set; }
 
-        public bool requestStatus { get; set; }
+        public bool friendAccepted { get; set; }
     }
 }

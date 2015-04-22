@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
@@ -14,9 +15,7 @@ namespace GoDaddyChatService
     public class ChatService : InterfaceServerChatService
     {
 
-        ServiceModel model = new ServiceModel(); 
-
-
+       
         Dictionary<String, InterfaceChatCallBack> loggedInUserChannels =
                         new Dictionary<String, InterfaceChatCallBack>(); // key username
 
@@ -25,7 +24,7 @@ namespace GoDaddyChatService
 
         UserAccessor userAccesor = new UserAccessor();
 
-
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public string Register(User user)
         {
             // 1) Opret ham i databasen
