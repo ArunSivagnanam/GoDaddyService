@@ -7,7 +7,7 @@ using System.ServiceModel;
 
 namespace Host
 {
-    class Program
+    class Start
     {
         static void Main(string[] args)
         {

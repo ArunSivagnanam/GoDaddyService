@@ -18,7 +18,7 @@ namespace GoDaddyChatService
         User Login(string username, string password);
 
         [OperationContract]
-        void LogOut(string username);
+        string LogOut(string username);
 
         [OperationContract]
         string SendMessage(string sender,string reciever, string message);
@@ -38,20 +38,41 @@ namespace GoDaddyChatService
     {
         [OperationContract]
         void RecievMessage(String message);
+
+        // RecieveFriendList(List<User>)
+
+        // UpdateFriendLits(User user)
     }
 
     // Use a data contract as illustrated in the sample below to add composite types to service operations.
     // You can add XSD files into the project. After building the project, you can directly use the data types defined there, with the namespace "GoDaddyChatService.ContractType".
     [DataContract]
-    public class User
+    public class User // Domæne 
     {
-        private string userName;
-       
         [DataMember]
-        public string name
-        {
-            get { return this.userName; }
-            set { this.userName = value; }
-        }
+        public int ID { get; set; }
+        [DataMember]
+        public string userName { get; set;}
+        [DataMember]
+        public string password { get; set;}
+        [DataMember]
+        public string firstName { get; set;}
+        [DataMember]
+        public string lastName { get; set; }
+        [DataMember]
+        public int status{ get; set; }
+       
     }
+
+    public class Message // Domæne 
+    {
+        [DataMember]
+        public int ID { get; set; }
+
+        [DataMember]
+        public User sender { get; set; }
+
+    }
+
+
 }

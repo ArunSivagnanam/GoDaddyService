@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Service.DataBaseAccess;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -22,15 +23,24 @@ namespace GoDaddyChatService
         Dictionary<String, User> loggedInUsers =
                         new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
 
+        UserAccessor userAccesor = new UserAccessor();
+
 
         public string Register(User user)
         {
             // 1) Opret ham i databasen
+            long id = userAccesor.addUser(userAccesor.passToUserDomain(user));
 
-            return "";
+            if (id != -1)
+            {
+                return "SUCCESS";
+            }else{
+                return "FAIL";
+            }
+           
         }
 
-        public string Login(string username, string password)
+        public User Login(string username, string password)
         {
             // 1) Hent bruger fra databasen ud fra username og password hvis han eksistere
             
@@ -41,11 +51,17 @@ namespace GoDaddyChatService
             // 4) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
 
             // 5) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
-            
-            return ";";
+
+            return null;
         }
 
-        string SendMessage(string sender ,string reciever, string message)
+        public string LogOut(string username)
+        {
+            // 1) fjern ham fra dictionary
+            return "somthing cool";
+        }
+
+        public string SendMessage(string sender ,string reciever, string message)
         {
             // 1) Check om reciever er obline (er han i dictionary)
 
@@ -61,7 +77,7 @@ namespace GoDaddyChatService
             return "";
         }
 
-        String AddFriend(string user, string friend)
+        public String AddFriend(string user, string friend)
         {
             // 1) Check om friend eksistere i db og om de allerede er venner
             
@@ -77,7 +93,7 @@ namespace GoDaddyChatService
         }
 
 
-        string RemoveFriend(string user, string friend)
+        public string RemoveFriend(string user, string friend)
         {
             // 1) Check om friend eksistere i db og om de allerede er venner
 
@@ -90,7 +106,7 @@ namespace GoDaddyChatService
             return "";
         }
 
-        string GetMessageHistory(string user, string friend)
+        public string GetMessageHistory(string user, string friend)
         {
 
             // 1) Skaf callback channel for user
