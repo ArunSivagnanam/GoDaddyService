@@ -60,7 +60,7 @@ namespace GoDaddyChatService
            
 
             
-            // 3) Skaf usernames for brugerens venner fra databasen
+            // 3) Skaf usernames for brugerens venner fra databasen g
             
             // 4) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
 
