@@ -1,4 +1,5 @@
-﻿using Service.DataBaseAccess;
+﻿using GoDaddyChatService.DomainObjects;
+using Service.DataBaseAccess;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,19 +17,17 @@ namespace GoDaddyChatService
     {
 
        
-        Dictionary<String, InterfaceChatCallBack> loggedInUserChannels =
-                        new Dictionary<String, InterfaceChatCallBack>(); // key username
 
         Dictionary<String, User> loggedInUsers =
                         new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
 
         UserAccessor userAccesor = new UserAccessor();
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
+        [MethodImpl(MethodImplOptions.Synchronized)] // brug en ny tråd 
         public string Register(User user)
         {
             // 1) Opret ham i databasen
-            long id = userAccesor.addUser(userAccesor.passToUserDomain(user));
+            long id = userAccesor.addUser(user);
 
             if (id != -1)
             {
@@ -42,9 +41,25 @@ namespace GoDaddyChatService
         public User Login(string username, string password)
         {
             // 1) Hent bruger fra databasen ud fra username og password hvis han eksistere
-            
-            // 2) Smid usernam + callbackchennel i dictionary loggedin user channels
+          
 
+            User u = userAccesor.getUserByUsernameAndPassword(username, password);
+
+            if (u == null || loggedInUsers.ContainsKey(u.userName))
+            {
+                return null;
+            }
+            else
+            {
+                // 2) Smid usernam + callbackchennel i dictionary loggedin user channels
+                u.channel = GetCurrentCallBackChannel;
+                loggedInUsers.Add(u.userName, u);
+
+            }
+
+           
+
+            
             // 3) Skaf usernames for brugerens venner fra databasen
             
             // 4) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
@@ -115,6 +130,18 @@ namespace GoDaddyChatService
             // 3) retunere svaret som formateret string eller en liste af stringe eller noget
 
             return "";
+        }
+
+
+
+        // PRIVATE METHODS NOT PART OF INTERFACE
+        private InterfaceChatCallBack GetCurrentCallBackChannel
+        {
+            get
+            {
+                return OperationContext.Current.GetCallbackChannel<InterfaceChatCallBack>();
+            }
+
         }
 
     }

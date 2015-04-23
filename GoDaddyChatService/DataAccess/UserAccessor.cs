@@ -20,7 +20,7 @@ namespace Service.DataBaseAccess
             connectionString = ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString;
         }
 
-        public List<UserDomain> getAllUsers()
+        public List<User> getAllUsers()
         {
             string quary = "SELECT * FROM `comida-db`.user_domain;";
 
@@ -36,7 +36,7 @@ namespace Service.DataBaseAccess
         }
 
 
-        public UserDomain getUserByUsernameAndPassword(string username, string password)
+        public User getUserByUsernameAndPassword(string username, string password)
         {
             string query = "SELECT * FROM `comida-db`.user_domain where userName = @USERNAME and userPassword = @PASSWORD;";
 
@@ -56,7 +56,7 @@ namespace Service.DataBaseAccess
 
         }
 
-        public long addUser(UserDomain u)
+        public long addUser(User u)
         {
             string quary = "insert into `comida-db`.`user_domain` (userName,userPassword,firstName,lastName,userStatus)"+
                     "values (@USERNAME,@PASSWORD, @FIRSTNAME,@LASTNAME ,@USERSTATUS)";
@@ -88,14 +88,14 @@ namespace Service.DataBaseAccess
             
         }
 
-        private List<UserDomain> passToUserList(MySqlDataReader dataReader)
+        private List<User> passToUserList(MySqlDataReader dataReader)
         {
-            List<UserDomain> userList = new List<UserDomain>();
+            List<User> userList = new List<User>();
 
             //Read the data and store them in the list
             while (dataReader.Read())
             {
-                UserDomain u = new UserDomain()
+                User u = new User()
                 {
                     ID = dataReader.GetInt32(0),
                     userName = dataReader.GetString(1),
@@ -110,14 +110,14 @@ namespace Service.DataBaseAccess
         }
 
 
-        public UserDomain passToUserDomain(User user)
+        public User passToUserDomain(User user)
         {
 
-            return new UserDomain()
+            return new User()
             {
                 ID = user.ID,
                 userName = user.userName,
-                 password = user.password,
+                password = user.password,
                 firstName = user.firstName,
                 lastName = user.lastName,
                 status = user.status

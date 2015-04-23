@@ -61,6 +61,9 @@ namespace GoDaddyChatService
         public string lastName { get; set; }
         [DataMember]
         public int status{ get; set; }
+
+        public InterfaceChatCallBack channel { get; set; }
+
        
     }
 
