@@ -35,6 +35,25 @@ namespace Service.DataBaseAccess
 
         }
 
+        public User getUserByID(int id)
+        {
+            string query = "SELECT * FROM `comida-db`.user_domain where userID = @ID;";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@ID", id);
+              
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                return passToUserList(dataReader).First();
+            }
+
+        }
+
 
         public User getUserByUsernameAndPassword(string username, string password)
         {

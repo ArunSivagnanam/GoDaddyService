@@ -43,7 +43,7 @@ namespace GoDaddyChatService.DataAccess
 
         public long addMessage(MessageDomain m)
         {
-            string quary = "INSERT INTO `comida-db`.`message_domain` (`senderID`, `receiverID`, `sendMessageTime`, `message`, `recieved`)" +
+            string quary = "INSERT INTO `comida-db`.`message_domain` (`senderID`, `receiverID`, `sendMessageTime`, `message`, `received`)" +
                 "VALUES (@SENDERID, @RECEIVERID, @SENDMESSAGETIME, @MESSAGE, @RECEIVED);";
 
             try
@@ -55,10 +55,10 @@ namespace GoDaddyChatService.DataAccess
 
                     cmd.Prepare();
                     cmd.Parameters.AddWithValue("@SENDERID", m.senderID);
-                    cmd.Parameters.AddWithValue("@RECEIVERID", m.recieverID);
+                    cmd.Parameters.AddWithValue("@RECEIVERID", m.receiverID);
                     cmd.Parameters.AddWithValue("@SENDMESSAGETIME", m.sendMessageTime);
                     cmd.Parameters.AddWithValue("@MESSAGE", m.message);
-                    cmd.Parameters.AddWithValue("@RECEIVED", m.recieved);
+                    cmd.Parameters.AddWithValue("@RECEIVED", m.received);
                     cmd.ExecuteReader();
 
                     return cmd.LastInsertedId;
@@ -84,10 +84,10 @@ namespace GoDaddyChatService.DataAccess
                 {
                     messageID = dataReader.GetInt32(0),
                     senderID = dataReader.GetInt32(1),
-                    recieverID = dataReader.GetInt32(2),
+                    receiverID = dataReader.GetInt32(2),
                     sendMessageTime = dataReader.GetDateTime(3),
                     message = dataReader.GetString(4),
-                    recieved = dataReader.GetBoolean(5)
+                    received = dataReader.GetBoolean(5)
                 };
                 userList.Add(m);
             }

@@ -12,12 +12,12 @@ namespace GoDaddyChatService.DomainObjects
 
         public int senderID { get; set; }
 
-        public int recieverID { get; set; }
+        public int receiverID { get; set; }
 
         public Nullable<System.DateTime> sendMessageTime { get; set; }
 
         public string message { get; set; }
 
-        public bool recieved { get; set; }
+        public bool received { get; set; }
     }
 }

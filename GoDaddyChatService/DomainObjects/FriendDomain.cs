@@ -10,10 +10,10 @@ namespace GoDaddyChatService.DomainObjects
     {
 
         public int id { get; set; }
-        public int requesterID { get; set; }
+        public int userID { get; set; }
 
         public int friendID { get; set; }
 
-        public bool friendAccepted { get; set; }
+        public int status { get; set; }
     }
 }

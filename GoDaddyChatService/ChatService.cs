@@ -1,4 +1,5 @@
-﻿using GoDaddyChatService.DomainObjects;
+﻿using GoDaddyChatService.DataAccess;
+using GoDaddyChatService.DomainObjects;
 using Service.DataBaseAccess;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace GoDaddyChatService
                         new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
 
         UserAccessor userAccesor = new UserAccessor();
+
+        FriendAccessor friendAccessor = new FriendAccessor();
 
         [MethodImpl(MethodImplOptions.Synchronized)] // brug en ny tråd 
         public string Register(User user)
@@ -54,19 +57,46 @@ namespace GoDaddyChatService
                 // 2) Smid usernam + callbackchennel i dictionary loggedin user channels
                 u.channel = GetCurrentCallBackChannel;
                 loggedInUsers.Add(u.userName, u);
+                u.status = 1;
+
+                // 3) Skaf usernames for brugerens venner fra databasen 
+                List<FriendDomain> friendIDs = friendAccessor.getFriends(u.ID);
+                List<User> friends = new List<User>();
+
+                foreach (FriendDomain f in friendIDs)
+                {
+                        
+                        User friend = userAccesor.getUserByID(f.friendID);
+                        friends.Add(friend);
+                        // kig på om status er not accepted; 
+                        
+                        if (loggedInUsers.ContainsKey(friend.userName))
+                        {
+                            friend.status = 1; // 1 = online
+
+                            // 4) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
+                            InterfaceChatCallBack friendChannel = loggedInUsers[friend.userName].channel;
+                            friendChannel.UpdateFriendLits(u);
+                        } else if (friend.status == 2)
+                        {
+                            // nothing
+                        }
+                        else
+                        {
+                            friend.status = 0; // 0 = offline
+                        }
+                    
+               }
+                   
+                   
+                // 5) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
+
+                InterfaceChatCallBack userChannel = loggedInUsers[u.userName].channel;
+                userChannel.RecieveFriendList(friends);
+
+                return u;
 
             }
-
-           
-
-            
-            // 3) Skaf usernames for brugerens venner fra databasen g
-            
-            // 4) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
-
-            // 5) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
-
-            return null;
         }
 
         public string LogOut(string username)
