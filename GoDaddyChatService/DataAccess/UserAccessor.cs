@@ -111,7 +111,7 @@ namespace Service.DataBaseAccess
         {
             List<User> userList = new List<User>();
 
-            //Read the data and store them in the list
+            //Read the data and store them in the list jjd //
             while (dataReader.Read())
             {
                 User u = new User()
