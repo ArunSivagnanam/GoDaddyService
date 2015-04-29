@@ -22,7 +22,7 @@ namespace GoDaddyChatService
         string LogOut(string username);
 
         [OperationContract]
-        string SendMessage(string sender,string reciever, string message);
+        string SendMessage(Message m);
 
         [OperationContract]
         String AddFriend(string user, string friend);
@@ -75,17 +75,15 @@ namespace GoDaddyChatService
         
 
         [DataMember]
-        string senderUserName { get; set; }
+        public string senderUserName { get; set; }
 
         [DataMember]
-        string receiverUserName { get; set; }
+        public string receiverUserName { get; set; }
         [DataMember]
         public Nullable<System.DateTime> sendMessageTime { get; set; }
-
-
-
-
-
+        
+        [DataMember]
+        public string message { get; set; }
     }
 
 

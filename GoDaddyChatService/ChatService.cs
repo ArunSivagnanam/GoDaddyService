@@ -30,8 +30,8 @@ namespace GoDaddyChatService
                         new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
 
         UserAccessor userAccesor = new UserAccessor();
-
         FriendAccessor friendAccessor = new FriendAccessor();
+        MessageAccessor messageAccessor = new MessageAccessor();
 
         [MethodImpl(MethodImplOptions.Synchronized)] // brug en ny tråd 
         
@@ -114,25 +114,33 @@ namespace GoDaddyChatService
             return "SUCCESS";
         }
 
-        public string SendMessage(string sender ,string reciever, string message)
+        public string SendMessage(Message m)
         {
+
+            Console.WriteLine(m.sendMessageTime+" Forwarding a message to "+m.receiverUserName);
             // 1) Check om reciever er obline (er han i dictionary)
 
-            if (loggedInUsers.ContainsKey(reciever))
+            if (loggedInUsers.ContainsKey(m.receiverUserName))
             {
 
-                // 2) Skaf callback channel for reciver og sender
-                InterfaceChatCallBack receiverChannel = loggedInUsers[reciever].channel;
-                InterfaceChatCallBack senderChannel = loggedInUsers[sender].channel;
+                // 2) Skaf callback channel for reciver 
+                InterfaceChatCallBack receiverChannel = loggedInUsers[m.receiverUserName].channel;
 
                 try
                 {
                     // 3) Kald RecieveMessage metoden på reciever
-                    receiverChannel.RecievMessage(message);
+                    receiverChannel.RecievMessage(m.message);
                     // 5) Opdatere message history i db for sender og reciever
                     // message accessor.Add(besked med tid, og flag modtaget)
+                    MessageDomain md = new MessageDomain()
+                    {
+                        receiverID = loggedInUsers[m.receiverUserName].ID, senderID = loggedInUsers[m.senderUserName].ID, message = m.message, sendMessageTime = m.sendMessageTime,
+                        received = true
+                    };
 
-                    return message;
+                    messageAccessor.addMessage(md);
+
+                    return m.message;
                 }
                 catch (Exception e)
                 {
@@ -146,6 +154,13 @@ namespace GoDaddyChatService
             {
                 // læg besked op i pending messages i db
                 // message accessor.Add(besked med tid, og flag ikke modtaget)
+                MessageDomain md = new MessageDomain()
+                {
+                    receiverID = loggedInUsers[m.receiverUserName].ID, senderID = loggedInUsers[m.senderUserName].ID, message = m.message, sendMessageTime = m.sendMessageTime,
+                    received = false
+                };
+
+                messageAccessor.addMessage(md);
 
                 return "The user is not online but the mesage is saved in history";
             }
