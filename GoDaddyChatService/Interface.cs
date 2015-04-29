@@ -19,13 +19,21 @@ namespace GoDaddyChatService
         User Login(string username, string password);
 
         [OperationContract]
+        List<User> ReceiveFriendList(string username);
+        [OperationContract]
+        List<User> ReceiveFriendsToAccept(string username);
+
+        [OperationContract]
         string LogOut(string username);
 
         [OperationContract]
         string SendMessage(Message m);
 
         [OperationContract]
-        String AddFriend(string user, string friend);
+        String AddFriend(string userName, string friendName);
+
+        [OperationContract]
+        String AcceptFriend(string requesterName, string userName);
         
         [OperationContract]
         string RemoveFriend(string user, string friend);
@@ -41,10 +49,15 @@ namespace GoDaddyChatService
         void RecievMessage(String message);
 
         [OperationContract]
-        void RecieveFriendList(List<User> friends);
+        void UpdateFriendList(User user);
 
         [OperationContract]
-        void UpdateFriendLits(User user);
+        void UpdatePendingFriendList(User user);
+
+        [OperationContract]
+        void removeFromPendingList(User user);
+      
+        
     }
 
     // Use a data contract as illustrated in the sample below to add composite types to service operations.

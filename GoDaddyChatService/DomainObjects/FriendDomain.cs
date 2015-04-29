@@ -15,5 +15,13 @@ namespace GoDaddyChatService.DomainObjects
         public int friendID { get; set; }
 
         public int status { get; set; }
+
+        public FriendDomain(int userID, int friendID, int status)
+        {
+            this.friendID = friendID;
+            this.userID = userID;
+            this.status = status;
+        }
+
     }
 }

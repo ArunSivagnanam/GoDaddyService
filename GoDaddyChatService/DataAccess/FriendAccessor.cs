@@ -20,7 +20,7 @@ namespace GoDaddyChatService.DataAccess
             connectionString = ConfigurationManager.ConnectionStrings["MySqlConnectionString"].ConnectionString;
         }
 
-        // hej // jej
+
         public List<FriendDomain> getFriends(int userID)
         {
             string query = "SELECT * FROM `comida-db`.friend_domain where userID = @USERID";
@@ -36,6 +36,87 @@ namespace GoDaddyChatService.DataAccess
                 MySqlDataReader dataReader = cmd.ExecuteReader();
 
                 return parseToFriendList(dataReader);
+            }
+        }
+
+        public List<FriendDomain> getFriendsToAccept(int userID)
+        {
+            string query = "SELECT * FROM `comida-db`.friend_domain where friendID = @USERID and friendshipStatus = 0";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@USERID", userID);
+
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                return parseToFriendList(dataReader);
+            }
+        }
+
+        public void setStatusForFriendRequest(int userID, int requesterID)
+        {
+            string query = "UPDATE `comida-db`.`friend_domain` SET `friendshipStatus`='1' WHERE userID =@REQUESTERID and friendID = @USERID and friendshipStatus = 0";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@REQUESTERID", requesterID);
+                cmd.Parameters.AddWithValue("@USERID", userID);
+
+                cmd.ExecuteReader();
+            }
+        }
+
+        public void finalizeFriendRequest(int userID, int requesterID)
+        {
+
+            string query = "INSERT INTO `comida-db`.`friend_domain` (`userID`, `friendID`, `friendshipStatus`) VALUES (@USERID, @REQUESTERID, '1');";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@REQUESTERID", requesterID);
+                cmd.Parameters.AddWithValue("@USERID", userID);
+
+                cmd.ExecuteReader();
+            }
+        }
+
+        public bool checkFriend(int userID , int friendID)
+        {
+            string query = "SELECT * FROM `comida-db`.friend_domain where userID = @USERID and friendID = @FRIENDID and friendshipStatus = 1";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@USERID", userID);
+                cmd.Parameters.AddWithValue("@FRIENDID", friendID);
+
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                List<FriendDomain> result = parseToFriendList(dataReader);
+
+                if (result.Count > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 

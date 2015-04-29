@@ -26,6 +26,9 @@ namespace GoDaddyChatService
         public const int ONLINE = 1;
         public const int OFFLINE = 0;
 
+        public const int FriendAcepted = 1;
+        public const int FriendNotAcepted = 0;
+
         Dictionary<String, User> loggedInUsers =
                         new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
 
@@ -57,8 +60,6 @@ namespace GoDaddyChatService
 
             User u = userAccesor.getUserByUsernameAndPassword(username, password);
 
-            
-
             if (u == null || loggedInUsers.ContainsKey(u.userName))
             {
                 return null;
@@ -73,38 +74,63 @@ namespace GoDaddyChatService
 
                 // 3) Skaf usernames for brugerens venner fra databasen 
                 List<FriendDomain> friendIDs = friendAccessor.getFriends(u.ID);
-                List<User> friends = new List<User>(); // listen af venner som den loggede ind bruger skal have
-
+             
                 foreach (FriendDomain f in friendIDs)
                 {
-                        
+                    if (f.status == FriendAcepted)
+                    {
                         User friend = userAccesor.getUserByID(f.friendID);
-                        friends.Add(friend);
-                        
+ 
                         if (loggedInUsers.ContainsKey(friend.userName))
                         {
-                            friend.status = 1; // 1 = online
-
                             // 4) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
                             InterfaceChatCallBack friendChannel = loggedInUsers[friend.userName].channel;
-                            friendChannel.UpdateFriendLits(u);
-                        } 
-                        else
-                        {
-                            friend.status = 0; // 0 = offline
+                            friendChannel.UpdateFriendList(u);
                         }
-                    
+                    }
                }
                    
-               
-                // 5) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
-
-                InterfaceChatCallBack userChannel = loggedInUsers[u.userName].channel;
-                userChannel.RecieveFriendList(friends);
-
                 return u;
-
             }
+        }
+
+        // Denne metode skal kaldes efter login
+        public List<User> ReceiveFriendList(string username)
+        {
+            List<FriendDomain> friendIDs = friendAccessor.getFriends(loggedInUsers[username].ID);
+            List<User> friends = new List<User>(); // listen af venner som den loggede ind bruger skal have
+
+            foreach (FriendDomain f in friendIDs)
+            {
+                User friend = userAccesor.getUserByID(f.friendID);
+                friends.Add(friend);
+
+                if (loggedInUsers.ContainsKey(friend.userName))
+                {
+                    friend.status = 1; // 1 = online
+                }
+                else
+                {
+                    friend.status = 0; // 0 = offline
+                }
+            }
+
+            return friends;
+        }
+
+        // Denne metode skal kaldes efter login
+        public List<User> ReceiveFriendsToAccept(string username)
+        {
+            User user = loggedInUsers[username];
+            List<FriendDomain> friendIDs = friendAccessor.getFriendsToAccept(user.ID);
+            List<User> friends = new List<User>();
+
+            foreach (FriendDomain f in friendIDs)
+            {
+               User friend = userAccesor.getUserByID(f.userID);
+               friends.Add(friend);
+            }
+            return friends;
         }
 
         public string LogOut(string username)
@@ -134,7 +160,10 @@ namespace GoDaddyChatService
                     // message accessor.Add(besked med tid, og flag modtaget)
                     MessageDomain md = new MessageDomain()
                     {
-                        receiverID = loggedInUsers[m.receiverUserName].ID, senderID = loggedInUsers[m.senderUserName].ID, message = m.message, sendMessageTime = m.sendMessageTime,
+                        receiverID = loggedInUsers[m.receiverUserName].ID, 
+                        senderID = loggedInUsers[m.senderUserName].ID, 
+                        message = m.message, 
+                        sendMessageTime = m.sendMessageTime,
                         received = true
                     };
 
@@ -154,9 +183,13 @@ namespace GoDaddyChatService
             {
                 // læg besked op i pending messages i db
                 // message accessor.Add(besked med tid, og flag ikke modtaget)
+                User receiver = userAccesor.getUserByUserName(m.receiverUserName); // fra db da han ikke er online
                 MessageDomain md = new MessageDomain()
                 {
-                    receiverID = loggedInUsers[m.receiverUserName].ID, senderID = loggedInUsers[m.senderUserName].ID, message = m.message, sendMessageTime = m.sendMessageTime,
+                    receiverID = receiver.ID, 
+                    senderID = loggedInUsers[m.senderUserName].ID, 
+                    message = m.message, 
+                    sendMessageTime = m.sendMessageTime,
                     received = false
                 };
 
@@ -166,21 +199,72 @@ namespace GoDaddyChatService
             }
         }
 
-        public String AddFriend(string user, string friend)
+        public String AddFriend(string userName, string friendUserName)
         {
             // 1) Check om friend eksistere i db og om de allerede er venner
-            
-            // 2) opdatere db venneliste for user og friend med flag accepted false
+            User friend = userAccesor.getUserByUserName(friendUserName);
+            User user = loggedInUsers[userName];
 
-            // 3) Kald UpdateFriendLits(User friend) for user, men sæt friend status til "not accepted"
+            if (!(friendAccessor.checkFriend(friend.ID, user.ID)))
+            { // de er ikke venner
+                FriendDomain fd = new FriendDomain(user.ID, friend.ID, 0);
+                friendAccessor.addFriend(fd);
+                // opdatere pending friends på vennen hvis han er online
+                if(loggedInUsers.ContainsKey(friend.userName)){
+                    
+                    InterfaceChatCallBack friendChannel = loggedInUsers[friend.userName].channel;
+                    friendChannel.UpdatePendingFriendList(user);
+                }
+                return "Friend request sent";
+            }
+            else
+            {
+                return "Already friends";
+            }
 
-            // 4) Hvis friend er online kald UpdateFriendLits(User user) på friend, friend skal derefter acceptere user
-            
-            // 5) Hvis friend ikke er online, skal han acceptere user neste gang han logger ind. 
-
-            return "";
         }
 
+        public String AcceptFriend(string friendToAcceptName, string username)
+        {
+            try
+            {
+                User friendToAccept = userAccesor.getUserByUserName(friendToAcceptName);
+                User user = loggedInUsers[username];
+
+                // update existerende row til status 1
+                friendAccessor.setStatusForFriendRequest(user.ID, friendToAccept.ID);
+
+                // add en ny row med status 1
+                friendAccessor.finalizeFriendRequest(user.ID, friendToAccept.ID);
+
+                // updatere userens friend list
+                InterfaceChatCallBack userChannel = loggedInUsers[user.userName].channel;
+
+                if (loggedInUsers.ContainsKey(friendToAccept.userName))
+                {
+                    friendToAccept.status = ONLINE;
+                    InterfaceChatCallBack friendChannel = loggedInUsers[friendToAccept.userName].channel;
+                    friendChannel.UpdateFriendList(user);
+                }
+                else
+                {
+                    friendToAccept.status = OFFLINE;
+                }
+
+                userChannel.UpdateFriendList(friendToAccept); // requester
+
+                // fjern ham fra pending list
+                userChannel.removeFromPendingList(friendToAccept);
+
+                return "FRIEND ACCEPTED";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                return "ERROR";
+            }
+           
+        }
 
         public string RemoveFriend(string user, string friend)
         {
