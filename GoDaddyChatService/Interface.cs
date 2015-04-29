@@ -7,6 +7,7 @@ using System.Text;
 
 namespace GoDaddyChatService
 {
+
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IService1" in both code and config file together.
     [ServiceContract(CallbackContract = typeof(InterfaceChatCallBack))] 
     public interface InterfaceServerChatService
@@ -42,6 +43,7 @@ namespace GoDaddyChatService
         [OperationContract]
         void RecieveFriendList(List<User> friends);
 
+        [OperationContract]
         void UpdateFriendLits(User user);
     }
 
@@ -70,11 +72,19 @@ namespace GoDaddyChatService
 
     public class Message // Domæne 
     {
-        [DataMember]
-        public int ID { get; set; }
+        
 
         [DataMember]
-        public User sender { get; set; }
+        string senderUserName { get; set; }
+
+        [DataMember]
+        string receiverUserName { get; set; }
+        [DataMember]
+        public Nullable<System.DateTime> sendMessageTime { get; set; }
+
+
+
+
 
     }
 

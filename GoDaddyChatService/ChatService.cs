@@ -12,12 +12,19 @@ using System.Threading;
 
 namespace GoDaddyChatService
 {
+
+    // USER STATUS
+    // 1 = logged in
+    // 0 = Ofline
+
+
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in both code and config file together.
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class ChatService : InterfaceServerChatService
     {
 
-       
+        public const int ONLINE = 1;
+        public const int OFFLINE = 0;
 
         Dictionary<String, User> loggedInUsers =
                         new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
@@ -27,10 +34,12 @@ namespace GoDaddyChatService
         FriendAccessor friendAccessor = new FriendAccessor();
 
         [MethodImpl(MethodImplOptions.Synchronized)] // brug en ny tråd 
+        
         public string Register(User user)
         {
             // 1) Opret ham i databasen
             long id = userAccesor.addUser(user);
+            // TODO check om username er optaget
 
             if (id != -1)
             {
@@ -48,6 +57,8 @@ namespace GoDaddyChatService
 
             User u = userAccesor.getUserByUsernameAndPassword(username, password);
 
+            
+
             if (u == null || loggedInUsers.ContainsKey(u.userName))
             {
                 return null;
@@ -57,18 +68,18 @@ namespace GoDaddyChatService
                 // 2) Smid usernam + callbackchennel i dictionary loggedin user channels
                 u.channel = GetCurrentCallBackChannel;
                 loggedInUsers.Add(u.userName, u);
-                u.status = 1;
+                u.status = ONLINE;
+                Console.WriteLine("User logged in: " + u.firstName);
 
                 // 3) Skaf usernames for brugerens venner fra databasen 
                 List<FriendDomain> friendIDs = friendAccessor.getFriends(u.ID);
-                List<User> friends = new List<User>();
+                List<User> friends = new List<User>(); // listen af venner som den loggede ind bruger skal have
 
                 foreach (FriendDomain f in friendIDs)
                 {
                         
                         User friend = userAccesor.getUserByID(f.friendID);
                         friends.Add(friend);
-                        // kig på om status er not accepted; 
                         
                         if (loggedInUsers.ContainsKey(friend.userName))
                         {
@@ -77,10 +88,7 @@ namespace GoDaddyChatService
                             // 4) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
                             InterfaceChatCallBack friendChannel = loggedInUsers[friend.userName].channel;
                             friendChannel.UpdateFriendLits(u);
-                        } else if (friend.status == 2)
-                        {
-                            // nothing
-                        }
+                        } 
                         else
                         {
                             friend.status = 0; // 0 = offline
@@ -88,7 +96,7 @@ namespace GoDaddyChatService
                     
                }
                    
-                   
+               
                 // 5) Kald RecieveFriendList(List<User>) metoden på brugeren som vil logge ind og giv ham listen af venner i form af User objecter fra dict
 
                 InterfaceChatCallBack userChannel = loggedInUsers[u.userName].channel;
@@ -102,23 +110,45 @@ namespace GoDaddyChatService
         public string LogOut(string username)
         {
             // 1) fjern ham fra dictionary
-            return "somthing cool";
+            loggedInUsers.Remove(username);
+            return "SUCCESS";
         }
 
         public string SendMessage(string sender ,string reciever, string message)
         {
             // 1) Check om reciever er obline (er han i dictionary)
 
-            // 2) Skaf callback channel for reciver og sender
-            
-            // 3) Kald RecieveMessage metoden på reciever
+            if (loggedInUsers.ContainsKey(reciever))
+            {
 
-            // 4) Hvis beskeden modtages korrekt, send samme besked tilbage til sender
+                // 2) Skaf callback channel for reciver og sender
+                InterfaceChatCallBack receiverChannel = loggedInUsers[reciever].channel;
+                InterfaceChatCallBack senderChannel = loggedInUsers[sender].channel;
+
+                try
+                {
+                    // 3) Kald RecieveMessage metoden på reciever
+                    receiverChannel.RecievMessage(message);
+                    // 5) Opdatere message history i db for sender og reciever
+                    // message accessor.Add(besked med tid, og flag modtaget)
+
+                    return message;
+                }
+                catch (Exception e)
+                {
+                    // 4) Hvis beskeden modtages korrekt, send samme besked tilbage til sender
                     // ellers send fejl besked
+                    return "ERROR";
+                }
+                
+            }
+            else
+            {
+                // læg besked op i pending messages i db
+                // message accessor.Add(besked med tid, og flag ikke modtaget)
 
-            // 5) Opdatere message history i db for sender og reciever
-
-            return "";
+                return "The user is not online but the mesage is saved in history";
+            }
         }
 
         public String AddFriend(string user, string friend)
