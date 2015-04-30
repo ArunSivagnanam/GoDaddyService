@@ -184,7 +184,7 @@ namespace GoDaddyChatService
             {
                 // læg besked op i pending messages i db
                 // message accessor.Add(besked med tid, og flag ikke modtaget)
-                User receiver = userAccesor.getUserByUserName(m.receiverUserName); // fra db da han ikke er online
+                User receiver = userAccesor.getUserByUserName(m.receiverUserName); // fra db da han ikke er online - hallo
                 MessageDomain md = new MessageDomain()
                 {
                     receiverID = receiver.ID, 
