@@ -130,6 +130,7 @@ namespace GoDaddyChatService
                User friend = userAccesor.getUserByID(f.userID);
                friends.Add(friend);
             }
+         
             return friends;
         }
 
@@ -213,7 +214,7 @@ namespace GoDaddyChatService
                 if(loggedInUsers.ContainsKey(friend.userName)){
                     
                     InterfaceChatCallBack friendChannel = loggedInUsers[friend.userName].channel;
-                    friendChannel.UpdatePendingFriendList(user);
+                    friendChannel.UpdateFriendsToAcceptList(user);
                 }
                 return "Friend request sent";
             }

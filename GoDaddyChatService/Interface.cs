@@ -52,7 +52,7 @@ namespace GoDaddyChatService
         void UpdateFriendList(User user);
 
         [OperationContract]
-        void UpdatePendingFriendList(User user);
+        void UpdateFriendsToAcceptList(User user);
 
         [OperationContract]
         void removeFromPendingList(User user);
