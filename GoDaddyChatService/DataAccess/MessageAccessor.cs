@@ -23,7 +23,7 @@ namespace GoDaddyChatService.DataAccess
 
         public List<MessageDomain> getMessageHistory(int senderID, int receiverID){
 
-            string query = "SELECT * FROM `comida-db`.message_domain where senderID = @SENDERID and receiverID = @RECEIVERID";
+            string query = "SELECT * FROM `comida-db`.message_domain where (senderID = @SENDERID and receiverID = @RECEIVERID) or (senderID = @RECEIVERID and receiverID = @SENDERID) ORDER BY sendMessageTime ASC";
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {

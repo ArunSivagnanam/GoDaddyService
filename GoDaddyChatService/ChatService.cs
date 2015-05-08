@@ -136,8 +136,30 @@ namespace GoDaddyChatService
 
         public string LogOut(string username)
         {
+            User u = loggedInUsers[username];
+
             // 1) fjern ham fra dictionary
             loggedInUsers.Remove(username);
+
+            // 2) opdatere hans venner om at han er logget ud
+
+            List<FriendDomain> friendIDs = friendAccessor.getFriends(u.ID);
+
+            foreach (FriendDomain f in friendIDs)
+            {
+                if (f.status == FriendAcepted)
+                {
+                    User friend = userAccesor.getUserByID(f.friendID);
+
+                    if (loggedInUsers.ContainsKey(friend.userName))
+                    {
+                        // 4) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLitsRemove(User user)
+                        InterfaceChatCallBack friendChannel = loggedInUsers[friend.userName].channel;
+                        friendChannel.UpdateFriendListRemove(u);
+                    }
+                }
+            }
+
             return "SUCCESS";
         }
 
@@ -280,16 +302,50 @@ namespace GoDaddyChatService
             return "";
         }
 
-        public string GetMessageHistory(string user, string friend)
+        public List<Message> GetMessageHistory(string userName, string friendUsername)
         {
 
             // 1) Skaf callback channel for user
+            User user = loggedInUsers[userName];
+            int userID = user.ID;
+            User friend = userAccesor.getUserByUserName(friendUsername);
+            int friendID = friend.ID;
 
-            // 2) Skaf message history for reciever = user og sender = friend og send 
+            InterfaceChatCallBack userChannel = user.channel;
 
+            List<MessageDomain> messageHistDomain = messageAccessor.getMessageHistory(user.ID, friend.ID);
+            List<Message> messageHist = new List<Message>();
+            
+            // parsing to message format in datacontract from message databse domain
+            foreach (MessageDomain md in messageHistDomain)
+            {
+                Message m = new Message();
+                // saetter korrekt navn som sender
+                if (md.senderID == userID)
+                {
+                    m.senderUserName = user.userName;
+                }
+                else
+                {
+                    m.senderUserName = friend.userName;
+                }
+                // saetter korret navn som receiver
+
+                if (md.receiverID == user.ID)
+                {
+                    m.receiverUserName = user.userName;
+                }
+                else
+                {
+                    m.receiverUserName = friend.userName;
+                }
+                m.message = md.message;
+                m.sendMessageTime = md.sendMessageTime;
+                messageHist.Add(m);
+            }
             // 3) retunere svaret som formateret string eller en liste af stringe eller noget
 
-            return "";
+            return messageHist;
         }
 
 

@@ -39,7 +39,7 @@ namespace GoDaddyChatService
         string RemoveFriend(string user, string friend);
 
         [OperationContract]
-        string GetMessageHistory(string user, string friend);
+        List<Message> GetMessageHistory(string user, string friend);
 
     }
 
@@ -51,13 +51,14 @@ namespace GoDaddyChatService
         [OperationContract]
         void UpdateFriendList(User user);
 
+        void UpdateFriendListRemove(User user);
+
         [OperationContract]
         void UpdateFriendsToAcceptList(User user);
 
         [OperationContract]
         void removeFromPendingList(User user);
-      
-        
+           
     }
 
     // Use a data contract as illustrated in the sample below to add composite types to service operations.

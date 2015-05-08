@@ -78,20 +78,25 @@ namespace Service.DataBaseAccess
         {
             string query = "SELECT * FROM `comida-db`.user_domain where userName = @USERNAME and userPassword = @PASSWORD;";
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            try
             {
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand(query, conn);
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
 
-                cmd.Prepare();
-                cmd.Parameters.AddWithValue("@USERNAME", username);
-                cmd.Parameters.AddWithValue("@PASSWORD", password);
+                    cmd.Prepare();
+                    cmd.Parameters.AddWithValue("@USERNAME", username);
+                    cmd.Parameters.AddWithValue("@PASSWORD", password);
 
-                MySqlDataReader dataReader = cmd.ExecuteReader();
+                    MySqlDataReader dataReader = cmd.ExecuteReader();
 
-                return passToUserList(dataReader).First();
+                    return passToUserList(dataReader).First();
+                }
+            }catch(Exception e){
+                Console.WriteLine(e.StackTrace);
+                return null;
             }
-
         }
 
         public long addUser(User u)
