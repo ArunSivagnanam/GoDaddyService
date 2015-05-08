@@ -55,7 +55,7 @@ namespace GoDaddyChatService
 
         public User Login(string username, string password)
         {
-            // 1) Hent bruger fra databasen ud fra username og password hvis han eksistere
+            // 1) Hent bruger fra databasen ud fra username og password hvis han eksistere df
           
 
             User u = userAccesor.getUserByUsernameAndPassword(username, password);
