@@ -42,7 +42,7 @@ namespace GoDaddyChatService
         List<Message> GetMessageHistory(string user, string friend);
 
     }
-
+    
     public interface InterfaceChatCallBack
     {
         [OperationContract]
