@@ -198,7 +198,7 @@ namespace GoDaddyChatService
                 try
                 {
                     // 3) Kald RecieveMessage metoden på reciever
-                    receiverChannel.RecievMessage(m.message);
+                    receiverChannel.RecievMessage(m);
                     // 5) Opdatere message history i db for sender og reciever
                     // message accessor.Add(besked med tid, og flag modtaget)
                     MessageDomain md = new MessageDomain()

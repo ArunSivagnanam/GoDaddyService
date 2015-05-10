@@ -46,7 +46,7 @@ namespace GoDaddyChatService
     public interface InterfaceChatCallBack
     {
         [OperationContract]
-        void RecievMessage(String message);
+        void RecievMessage(Message message);
 
         [OperationContract]
         void UpdateFriendList(User user);
