@@ -2,6 +2,7 @@
 using GoDaddyChatService.DomainObjects;
 using Service.DataBaseAccess;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -14,12 +15,12 @@ namespace GoDaddyChatService
 {
 
     // USER STATUS
-    // 1 = logged in
+    // 1 = logged inh
     // 0 = Ofline
 
 
     // NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in both code and config file together.
-    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant)]
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)] // flere trådet på en singe instance wcf
     public class ChatService : InterfaceServerChatService
     {
 
@@ -29,8 +30,10 @@ namespace GoDaddyChatService
         public const int FriendAcepted = 1;
         public const int FriendNotAcepted = 0;
 
-        Dictionary<String, User> loggedInUsers =
-                        new Dictionary<String, User>(); // key username (maaske skal users callback channel gemmes i user objected)
+        ConcurrentDictionary<String, User> loggedInUsers =
+                        new ConcurrentDictionary<String, User>(); 
+        
+        
 
         UserAccessor userAccesor = new UserAccessor();
         FriendAccessor friendAccessor = new FriendAccessor();
@@ -38,7 +41,7 @@ namespace GoDaddyChatService
 
         [MethodImpl(MethodImplOptions.Synchronized)] // brug en ny tråd 
         
-        public string Register(User user)
+        public string Register(User user) // can udføres af flere tråde samtidig
         {
             // 1) Opret ham i databasen
             long id = userAccesor.addUser(user);
@@ -53,13 +56,13 @@ namespace GoDaddyChatService
            
         }
 
-        public User Login(string username, string password)
+        public User Login(string username, string password) //
         {
             // 1) Hent bruger fra databasen ud fra username og password hvis han eksistere df
           
-
             User u = userAccesor.getUserByUsernameAndPassword(username, password);
 
+            
             if (u == null || loggedInUsers.ContainsKey(u.userName))
             {
                 return null;
@@ -68,19 +71,23 @@ namespace GoDaddyChatService
             {
                 // 2) Smid usernam + callbackchennel i dictionary loggedin user channels
                 u.channel = GetCurrentCallBackChannel;
-                loggedInUsers.Add(u.userName, u);
+                if (!(loggedInUsers.TryAdd(u.userName, u)))
+                {
+                    return null; // concurency fejl
+                }
+            
                 u.status = ONLINE;
                 Console.WriteLine("User logged in: " + u.firstName);
 
                 // 3) Skaf usernames for brugerens venner fra databasen 
                 List<FriendDomain> friendIDs = friendAccessor.getFriends(u.ID);
-             
+
                 foreach (FriendDomain f in friendIDs)
                 {
                     if (f.status == FriendAcepted)
                     {
                         User friend = userAccesor.getUserByID(f.friendID);
- 
+
                         if (loggedInUsers.ContainsKey(friend.userName))
                         {
                             // 4) Alle Users i dictionry loggedInUsers som brugeren er venner med, skal have kaldt metoden UpdateFriendLits(User user)
@@ -88,15 +95,19 @@ namespace GoDaddyChatService
                             friendChannel.UpdateFriendList(u);
                         }
                     }
-               }
-                   
+                }
+
                 return u;
             }
+            
+
+            
         }
 
         // Denne metode skal kaldes efter login
         public List<User> ReceiveFriendList(string username)
         {
+
             List<FriendDomain> friendIDs = friendAccessor.getFriends(loggedInUsers[username].ID);
             List<User> friends = new List<User>(); // listen af venner som den loggede ind bruger skal have
 
@@ -139,7 +150,11 @@ namespace GoDaddyChatService
             User u = loggedInUsers[username];
 
             // 1) fjern ham fra dictionary
-            loggedInUsers.Remove(username);
+            User removed;
+            if (!(loggedInUsers.TryRemove(username, out removed)))
+            {
+                return "FAIL";
+            }
 
             // 2) opdatere hans venner om at han er logget ud
 
@@ -363,5 +378,3 @@ namespace GoDaddyChatService
     }
 }
 
-// skaf current call back
-// //OperationContext.Current.GetCallbackChannel<InterfaceChatCallBack>().RecievMessage("stat: " + i);

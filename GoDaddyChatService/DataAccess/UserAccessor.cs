@@ -112,7 +112,7 @@ namespace Service.DataBaseAccess
                     MySqlCommand cmd = new MySqlCommand(quary, conn);
 
                     cmd.Prepare();
-                    cmd.Parameters.AddWithValue("@USERNAME", u.firstName);
+                    cmd.Parameters.AddWithValue("@USERNAME", u.userName);
                     cmd.Parameters.AddWithValue("@PASSWORD", u.password);
                     cmd.Parameters.AddWithValue("@FIRSTNAME", u.firstName);
                     cmd.Parameters.AddWithValue("@LASTNAME", u.lastName);
