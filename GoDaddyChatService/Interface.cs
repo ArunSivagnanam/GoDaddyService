@@ -51,6 +51,7 @@ namespace GoDaddyChatService
         [OperationContract]
         void UpdateFriendList(User user);
 
+        [OperationContract] 
         void UpdateFriendListRemove(User user);
 
         [OperationContract]
@@ -63,9 +64,21 @@ namespace GoDaddyChatService
 
     // Use a data contract as illustrated in the sample below to add composite types to service operations.
     // You can add XSD files into the project. After building the project, you can directly use the data types defined there, with the namespace "GoDaddyChatService.ContractType".
+
+     [DataContract(Name = "Availability")]
+    public enum Availability {
+
+         [EnumMember]
+         Online,
+         [EnumMember]
+         Offline,
+         [EnumMember]
+         FriendRequest };
+
     [DataContract]
     public class User // Domæne 
     {
+       
         [DataMember]
         public int ID { get; set; }
         [DataMember]
@@ -76,12 +89,18 @@ namespace GoDaddyChatService
         public string firstName { get; set;}
         [DataMember]
         public string lastName { get; set; }
+               
         [DataMember]
-        public int status{ get; set; }
+        public Availability Status { get; set; }
 
         public InterfaceChatCallBack channel { get; set; }
 
-       
+        [OperationContract]
+        
+        public override string ToString()
+        {
+            return userName;
+        }
     }
 
     public class Message // Domæne 

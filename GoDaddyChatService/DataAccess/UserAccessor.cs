@@ -101,8 +101,7 @@ namespace Service.DataBaseAccess
 
         public long addUser(User u)
         {
-            string quary = "insert into `comida-db`.`user_domain` (userName,userPassword,firstName,lastName,userStatus)"+
-                    "values (@USERNAME,@PASSWORD, @FIRSTNAME,@LASTNAME ,@USERSTATUS)";
+            string quary = "INSERT INTO `comida-db`.`user_domain` (`userName`, `userPassword`, `firstName`, `lastName`) VALUES (@USERNAME, @PASSWORD, @FIRSTNAME, @LASTNAME);";
 
             try
             {
@@ -116,7 +115,6 @@ namespace Service.DataBaseAccess
                     cmd.Parameters.AddWithValue("@PASSWORD", u.password);
                     cmd.Parameters.AddWithValue("@FIRSTNAME", u.firstName);
                     cmd.Parameters.AddWithValue("@LASTNAME", u.lastName);
-                    cmd.Parameters.AddWithValue("@USERSTATUS", u.status);
                     cmd.ExecuteReader();
 
                     return cmd.LastInsertedId;
@@ -125,6 +123,7 @@ namespace Service.DataBaseAccess
             catch (Exception e)
             {
                 Debug.Write(e.StackTrace);
+                Console.Write(e.StackTrace);
                 return -1;
             }
 
@@ -144,8 +143,7 @@ namespace Service.DataBaseAccess
                     userName = dataReader.GetString(1),
                     password = dataReader.GetString(2),
                     firstName = dataReader.GetString(3),
-                    lastName = dataReader.GetString(4),
-                    status = dataReader.GetInt32(5)
+                    lastName = dataReader.GetString(4)
                 };
                 userList.Add(u);
             }
@@ -162,8 +160,7 @@ namespace Service.DataBaseAccess
                 userName = user.userName,
                 password = user.password,
                 firstName = user.firstName,
-                lastName = user.lastName,
-                status = user.status
+                lastName = user.lastName
             };
         }
 

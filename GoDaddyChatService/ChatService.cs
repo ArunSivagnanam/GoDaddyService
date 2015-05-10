@@ -75,8 +75,8 @@ namespace GoDaddyChatService
                 {
                     return null; // concurency fejl
                 }
-            
-                u.status = ONLINE;
+
+                u.Status = Availability.Online;
                 Console.WriteLine("User logged in: " + u.firstName);
 
                 // 3) Skaf usernames for brugerens venner fra databasen 
@@ -114,16 +114,20 @@ namespace GoDaddyChatService
             foreach (FriendDomain f in friendIDs)
             {
                 User friend = userAccesor.getUserByID(f.friendID);
-                friends.Add(friend);
+                if (f.status != 0)
+                {
+                    friends.Add(friend);
 
-                if (loggedInUsers.ContainsKey(friend.userName))
-                {
-                    friend.status = 1; // 1 = online
+                    if (loggedInUsers.ContainsKey(friend.userName))
+                    {
+                        friend.Status = Availability.Online; // 1 = online
+                    }
+                    else
+                    {
+                        friend.Status = Availability.Offline; // 0 = offline
+                    }
                 }
-                else
-                {
-                    friend.status = 0; // 0 = offline
-                }
+               
             }
 
             return friends;
@@ -160,6 +164,7 @@ namespace GoDaddyChatService
 
             List<FriendDomain> friendIDs = friendAccessor.getFriends(u.ID);
 
+            u.Status = Availability.Offline;
             foreach (FriendDomain f in friendIDs)
             {
                 if (f.status == FriendAcepted)
@@ -280,13 +285,13 @@ namespace GoDaddyChatService
 
                 if (loggedInUsers.ContainsKey(friendToAccept.userName))
                 {
-                    friendToAccept.status = ONLINE;
+                    friendToAccept.Status = Availability.Online;
                     InterfaceChatCallBack friendChannel = loggedInUsers[friendToAccept.userName].channel;
                     friendChannel.UpdateFriendList(user);
                 }
                 else
                 {
-                    friendToAccept.status = OFFLINE;
+                    friendToAccept.Status = Availability.Offline;
                 }
 
                 userChannel.UpdateFriendList(friendToAccept); // requester
