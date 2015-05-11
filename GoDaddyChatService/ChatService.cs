@@ -282,7 +282,7 @@ namespace GoDaddyChatService
                 // add en ny row med status 1
                 friendAccessor.finalizeFriendRequest(user.ID, friendToAccept.ID);
 
-                // updatere userens friend list
+                // updatere userens friend list fg
                 InterfaceChatCallBack userChannel = loggedInUsers[user.userName].channel;
 
                 if (loggedInUsers.ContainsKey(friendToAccept.userName))
