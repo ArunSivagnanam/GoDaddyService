@@ -39,7 +39,7 @@ namespace GoDaddyChatService
         FriendAccessor friendAccessor = new FriendAccessor();
         MessageAccessor messageAccessor = new MessageAccessor();
 
-        [MethodImpl(MethodImplOptions.Synchronized)] // brug en ny tråd 
+       
         
         public string Register(User user) // can udføres af flere tråde samtidig
         {
@@ -143,6 +143,7 @@ namespace GoDaddyChatService
             foreach (FriendDomain f in friendIDs)
             {
                User friend = userAccesor.getUserByID(f.userID);
+               friend.Status = Availability.FriendRequest;
                friends.Add(friend);
             }
          
@@ -152,6 +153,7 @@ namespace GoDaddyChatService
         public string LogOut(string username)
         {
             User u = loggedInUsers[username];
+            Console.WriteLine("Logged out: "+username);
 
             // 1) fjern ham fra dictionary
             User removed;
@@ -267,7 +269,7 @@ namespace GoDaddyChatService
 
         }
 
-        public String AcceptFriend(string friendToAcceptName, string username)
+        public void AcceptFriend(string friendToAcceptName, string username)
         {
             try
             {
@@ -294,17 +296,17 @@ namespace GoDaddyChatService
                     friendToAccept.Status = Availability.Offline;
                 }
 
+                userChannel.removeFromPendingList(friendToAccept);
                 userChannel.UpdateFriendList(friendToAccept); // requester
 
                 // fjern ham fra pending list
-                userChannel.removeFromPendingList(friendToAccept);
 
-                return "FRIEND ACCEPTED";
+                
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
-                return "ERROR";
+              
             }
            
         }

@@ -32,8 +32,8 @@ namespace GoDaddyChatService
         [OperationContract]
         String AddFriend(string userName, string friendName);
 
-        [OperationContract]
-        String AcceptFriend(string requesterName, string userName);
+        [OperationContract(IsOneWay = true)] // clienten vennter ikke på retur værdi
+        void AcceptFriend(string requesterName, string userName);
         
         [OperationContract]
         string RemoveFriend(string user, string friend);
